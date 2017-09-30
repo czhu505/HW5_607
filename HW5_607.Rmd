@@ -1,0 +1,114 @@
+---
+title: "HW5_607"
+author: "Chunhui Zhu"
+date: "September 27, 2017"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+##The chart above describes arrival delays for two airlines across five destinations. Your task is to:
+
+##(1) Create a .CSV file (or optionally, a MySQL database!) that includes all of the information above. You're encouraged to use a "wide" structure similar to how the information appears above, so that you can practice tidying and transformations as described below.
+
+```{r ecoh=F}
+library("tidyr")
+library("dplyr")
+library("stringr")
+```
+
+
+##(2) Read the information from your .CSV file into R, and use tidyr and dplyr as needed to tidy and transform your data.
+
+```{r}
+#read data from .csv file
+df<-data.frame(read.csv("hflight.csv",stringsAsFactors = FALSE))
+df 
+```
+
+
+```{r}
+#filter function remove the row which x.1 is empty, read in from second column
+#removed first column which contains airline's names
+#use t function to transform rows to columns
+
+df<-filter(df,df$X.1!="")
+df<-df[,-1]
+df1<-as.data.frame(t(df))
+df1
+```
+
+```{r}
+#remove the first row which contains header
+#assign columns names 
+
+df2<-df1[-1,]
+colnames(df2)<-c("Alaska_On_time", "Alaska_delay","Amwest_On_time", "Amwest_delay")
+df2
+```
+
+
+```{r}
+#df2 data type becomes factor. 
+#convert factor to numeric data type
+
+str(df2)
+
+df2$Alaska_On_time<-as.numeric(as.character(df2$Alaska_On_time))
+df2$Alaska_delay<-as.numeric(as.character(df2$Alaska_delay))
+df2$Amwest_On_time<-as.numeric(as.character(df2$Amwest_On_time))
+df2$Amwest_delay<-as.numeric(as.character(df2$Amwest_delay))
+df2
+```
+
+
+##3. compare the arrival delays for the two airlines.
+
+```{r}
+#find the delay rate for two airlines
+
+df2$Alaska_delay_r<-round(df2$Alaska_delay/(df2$Alaska_On_time+df2$Alaska_delay),2)
+df2$Amwest_delay_r<-round(df2$Amwest_delay/(df2$Amwest_On_time+df2$Amwest_delay),2)
+df2[,5:6]
+```
+
+```{r}
+#The result shows Amwest has higher delay rate than Alaska in 5 cities
+#Difference for taking Alaska to LA,Phonenix,San.Diego,San.Francisco,Seattle, 
+#you will probably have lesser risk to delay. 
+
+df2$Diff_delay_r<-df2$Alaska_delay_r-df2$Amwest_delay_r
+df2[,5:7]
+```
+
+
+```{r}
+#generate df2 table in r
+View(df2)
+```
+
+```{r}
+#creat a airlines.csv file for df2 data set at "C:/Users/Ivy/Desktop/607/W5"
+
+setwd("C:/Users/Ivy/Desktop/607/W5")
+write.csv(df2,"airlines.csv")
+```
+
+### Another thought for analysis
+
+```{r}
+#We lack of infomation about collected data like by seasons,daytime, 
+#passenger group,from which cities, and etc.
+#Even though the result from the above result shows Amwest airline 
+#having more delay, it doesn't convince people taking Amwest airline 
+#from city like NY will get more chance to delay than taking Alaska airline.
+```
+
+
+
+
+##(4) Your code should be in an R Markdown file, posted to rpubs.com, and should include narrative descriptions of your data cleanup work, analysis, and conclusions. Please include in your homework submission:
+##The URL to the .Rmd file in your GitHub repository. and
+##The URL for your rpubs.com web page.
+ 
+Please check out two URLs from the blackboard. 
