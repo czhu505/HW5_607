@@ -1,0 +1,115 @@
+---
+title: "HW5_607 tidyr & dplyr"
+author: "Chunhui Zhu"
+date: "October 1, 2017"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+
+##The chart above describes arrival delays for two airlines across five destinations. Your task is to:
+
+##(1) Create a .CSV file (or optionally, a MySQL database!) that includes all of the information above. You're encouraged to use a "wide" structure similar to how the information appears above, so that you can practice tidying and transformations as described below.
+
+```{r ecoh=F}
+library("tidyr")
+library("dplyr")
+```
+
+
+##(2) Read the information from your .CSV file into R, and use tidyr and dplyr as needed to tidy and transform your data.
+
+```{r}
+#read data from .csv file
+
+df<-data.frame(read.csv("hflight.csv",stringsAsFactors = FALSE))
+df
+```
+```{r}
+#fill in missed data in df$X
+
+df[2,1]<-"ALASKA"
+df[5,1]<-"AMWEST"
+df
+```
+
+```{r}
+#filter function remove the row which x.1 is empty, read in from second column
+
+df<-filter(df,df$X!="")
+df
+```
+
+```{r}
+#gather number by airline and status
+
+df2<- gather(df, key = "X.1", value = "count", Los.Angeles:Seattle)
+colnames(df2)<-c("airline","status","city","number")
+df2
+```
+
+```{r}
+#reorder table base on status
+
+df2[order(df2$airline,df2$status),]
+```
+
+
+```{r}
+#split table base on the airline and status
+#totally divid into four tables
+
+st<-split(df2, with(df2, interaction(airline,status)), drop = TRUE)
+st$ALASKA.delayed
+st$`ALASKA.on time`
+st$AMWEST.delayed
+st$`AMWEST.on time`
+```
+
+##3. compare the arrival delays for the two airlines.
+
+```{r}
+#calculat delay rate for airlines
+#built data frame t to store the data set
+
+Alaska_delay_r<-st$ALASKA.delayed$number/(st$ALASKA.delayed$number+st$`ALASKA.on time`$number)
+Amwest_delay_r<-st$AMWEST.delayed$number/(st$AMWEST.delayed$number+st$`AMWEST.on time`$number)
+
+cities<-c("Los.Angeles","Phoenix","San.Diego","San.Francisco","Seattle")
+t<-data.frame(cities, round(Alaska_delay_r,2), round(Amwest_delay_r,2))
+t
+```
+
+```{r}
+#The result shows Amwest has higher delay rate than Alaska in 5 cities
+#Difference for taking Alaska to LA,Phonenix,San.Diego,San.Francisco,Seattle, 
+#you will probably have lesser risk to delay. 
+
+```
+
+### Another thought for analysis
+
+```{r}
+#We lack of infomation about collected data like by seasons,daytime, 
+#passenger group,from which cities, and etc.
+#Even though the result from the above result shows Amwest airline 
+#having more delay, it doesn't convince people taking Amwest airline 
+#from city like NY will get more chance to delay than taking Alaska airline.
+```
+
+
+```{r}
+#creat a airlines.csv file for t data set at "C:/Users/Ivy/Desktop/607/W5"
+
+setwd("C:/Users/Ivy/Desktop/607/W5")
+write.csv(t,"t.csv")
+```
+
+
+##(4) Your code should be in an R Markdown file, posted to rpubs.com, and should include narrative descriptions of your data cleanup work, analysis, and conclusions. Please include in your homework submission:
+##The URL to the .Rmd file in your GitHub repository. and
+##The URL for your rpubs.com web page.
+ 
+Please check out two URLs from the blackboard. 
+
